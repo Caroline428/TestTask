@@ -7,6 +7,7 @@ const mainContent = document.querySelector('.main__content')
 
 
 btnCatalog.addEventListener('click', clickCatalog)
+// mainContent.addEventListener('click', clickUser)
 
 getUsers()
 
@@ -23,15 +24,26 @@ async function getUsers() {
         return users
 }
 
-async function getAlbums(userID) {
+async function getAlbums(userID, target) {
     let albums = await fetch(albumsUrl + userID)
         .then(response => response.json())
+    albums.forEach(
+        function (item, i) {
+            displayAlbums(item,i,target)
+    })
+
     return albums
 }
 
-async function getPhoto(albumID) {
+async function getPhoto(albumID, target) {
     let photo = await fetch(photoUrl + albumID)
         .then(response => response.json())
+    photo.forEach(
+        function (item, i) {
+            displayPhoto(item, i, target)
+        }
+    )
+    console.log(photo  )
     return photo
 }
 
@@ -42,26 +54,38 @@ function displayUsers(item, i) {
     mainContent.insertAdjacentHTML('beforeend',
     `
     <div class="main__item" id="${i}">
-        <button> + </button>
-        <div> ${username}</div>
+        <button class="item__button" id="${i}"> + </button>
+        <div class="item__content" id="${i}"> ${username}</div>
     </div>
         `)
 }
 
-function displayAlbums() {
-
+function displayAlbums(item, i, target) {
+    let mainItem = target
+    let title = item.title
+    mainItem.insertAdjacentHTML('beforeend',
+        `
+    <div class="main__album" id="${i}">
+        <button> + </button>
+        <div class="album__content" id="${i}"> ${title}</div>
+    </div>
+        `)
 }
 
-function displayPhoto() {
-
+function displayPhoto(item, i, target) {
+    let mainItem = target
+    console.log(item)
+    let thumbnailUrl = item.thumbnailUrl
+    mainItem.insertAdjacentHTML('beforeend',
+        `
+        <div class="album__photo">
+            <img src="${thumbnailUrl}">
+         </div>
+        `
+        )
 }
 
 ////////////////////////////////
-// function searchUser  () {
-//     const mainItemBtn = document.querySelector('.main__item')
-//     mainItemBtn.addEventListener('click', clickUser)
-//
-// }
 
 function clickCatalog(event) {
     if (mainContent.hasAttribute('hidden')) {
@@ -72,6 +96,37 @@ function clickCatalog(event) {
     }
 }
 
-// function clickUser() {
-//     console.log('клик хуик')
+
+
+
+
+
+mainContent.addEventListener('click', function (event) {
+    let target = event.target
+    if (target.classList.contains('item__content')) {
+        let id = target.getAttribute('id')
+        getAlbums(id, target)
+    }
+    else if (target.classList.contains('album__content')) {
+        let id = target.getAttribute('id')
+        getPhoto(id, target)
+    }
+
+
+
+})
+
+//Добавление слушателя каждому элементу списка
+// function addModEvent() {
+//     let mod = document.querySelectorAll('.main__item');
+//     for (let i = 0; i < mod.length; i++) {
+//         mod[i].addEventListener('click', clickUser);
+//     }
 // }
+
+// addModEvent();
+
+// document.querySelector('body').addEventListener('click', function(event) {
+//     if (event.target.tagName.toLowerCase() === 'li') {
+//         // do your action on your 'li' or whatever it is you're listening for
+//     } БОЛЕЕ ГИБКОЕ РЕШЕНИЕ, НАДО ПОНЯТЬ, КАК РЕАЛИЗОВАТЬ
