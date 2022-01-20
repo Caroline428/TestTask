@@ -6,80 +6,130 @@ const btnCatalog = document.querySelector('.btn-catalog')
 const mainContent = document.querySelector('.main__content')
 
 
-btnCatalog.addEventListener('click', clickCatalog)
-// mainContent.addEventListener('click', clickUser)
+
+
+
 
 getUsers()
 
 
 //////////////////////////////////////////
 async function getUsers() {
+    try {
+        displayPreLoader(mainContent)
         let users = await fetch(usersUrl)
             .then(response => response.json())
-        users.forEach (
-            function(item, i) {
-                displayUsers(item, i)
+
+        users.forEach(
+            function (item) {
+                displayUsers(item)
+
             }
         )
-        return users
+    }
+    catch (e) {
+        alert('Ошибка при загрузке списка пользователей')
+        displayError(mainContent)
+    }
+    finally {
+        removePreLoader()
+    }
+        // return users
 }
 
 async function getAlbums(userID, target) {
-    let albums = await fetch(albumsUrl + userID)
-        .then(response => response.json())
-    albums.forEach(
-        function (item, i) {
-            displayAlbums(item,i,target)
-    })
 
-    return albums
+    try {
+        // displayPreLoader(target)
+        let mainItem = document.querySelector(`.item__content_${userID}`)
+        let albums = await fetch(albumsUrl + userID)
+            .then(response => response.json())
+        albums.forEach(
+            function (item) {
+
+                displayAlbums(item, mainItem)
+            })
+    }
+    catch (e) {
+        alert('Ошибка при загрузке альбомов')
+        displayError(target)
+    }
+    finally {
+        // removePreLoader()
+
+    }
+
+
+    // return albums
 }
 
 async function getPhoto(albumID, target) {
-    let photo = await fetch(photoUrl + albumID)
-        .then(response => response.json())
-    photo.forEach(
-        function (item, i) {
-            displayPhoto(item, i, target)
-        }
-    )
-    console.log(photo  )
-    return photo
+
+    try {
+        // displayPreLoader(target)
+        let mainItem = document.querySelector(`.album__content_${albumID}`)
+        let photo = await fetch(photoUrl + albumID)
+            .then(response => response.json())
+        photo.forEach(
+            function (item) {
+                displayPhoto(item, mainItem)
+            }
+        )
+    }
+    catch (e) {
+        alert('Ошибка при загрузке фотографий')
+        displayError(target)
+    }
+    finally {
+        // removePreLoader()
+    }
+
+
+    // return photo
 }
 
 /////////////////////////////////////////////
 
-function displayUsers(item, i) {
+function displayUsers(item) {
     let username = item.name
+    let id = item.id
     mainContent.insertAdjacentHTML('beforeend',
     `
-    <div class="main__item" id="${i}">
-        <button class="item__button" id="${i}"> + </button>
-        <div class="item__content" id="${i}"> ${username}</div>
+    <div class="main__item" id="${id}">
+        <button class="button_plus_minus" id="${id}"> + </button>   
+        <div class="item_title" id="${id}"> 
+        ${username}
+        </div>
+            
     </div>
         `)
 }
 
-function displayAlbums(item, i, target) {
-    let mainItem = target
+function displayAlbums(item, mainItem) {
     let title = item.title
+    let id = item.id
+
+
     mainItem.insertAdjacentHTML('beforeend',
         `
-    <div class="main__album" id="${i}">
-        <button> + </button>
-        <div class="album__content" id="${i}"> ${title}</div>
+    <div class="main__album" id="${id}">
+        <button class="button_plus_minus"> + </button>
+        <div class="album_title" id="${id}"> 
+        ${title}
+        </div>
     </div>
         `)
 }
 
-function displayPhoto(item, i, target) {
-    let mainItem = target
-    console.log(item)
+function displayPhoto(item, mainItem) {
+    let id = item.id
+
     let thumbnailUrl = item.thumbnailUrl
     mainItem.insertAdjacentHTML('beforeend',
         `
         <div class="album__photo">
             <img src="${thumbnailUrl}">
+            <button class="star empty"></button>
          </div>
         `
         )
@@ -87,33 +137,78 @@ function displayPhoto(item, i, target) {
 
 ////////////////////////////////
 
-function clickCatalog(event) {
-    if (mainContent.hasAttribute('hidden')) {
-        mainContent.removeAttribute('hidden')
-    }
-    else {
-        mainContent.setAttribute('hidden','true')
-    }
+function displayPreLoader(target) {
+    let preLoader = 'images/loader.gif'
+
+    target.insertAdjacentHTML('afterend',
+        `
+        <div class="pre-loader">
+            <img src="${preLoader}"
+        </div>
+        `)
 }
 
 
+function displayError(target) {
+    let gifUrl = 'images/error.png'
+    target.insertAdjacentHTML('beforeend',
+        `
+        <div>
+            <img src="${gifUrl}"
+        </div>
+        `)
+}
+
+function removePreLoader() {
+    let preLoader = document.querySelector('.pre-loader')
+    preLoader.remove()
+
+}
+
+function removeError() {
+
+}
 
 
+///////////////////////////////
+
+// function clickCatalog(event) {
+//     if (mainContent.hasAttribute('hidden')) {
+//         mainContent.removeAttribute('hidden')
+//     }
+//     else {
+//         mainContent.setAttribute('hidden','true')
+//     }
+// }
 
 
 mainContent.addEventListener('click', function (event) {
     let target = event.target
-    if (target.classList.contains('item__content')) {
-        let id = target.getAttribute('id')
+    let id = target.getAttribute('id')
+
+    if (target.classList.contains('item_title') && !target.classList.contains('open') ) {
+        target.insertAdjacentHTML('afterend', `<div class="item__content item__content_${id}"> </div>`)
         getAlbums(id, target)
+        target.classList.add('open')
     }
-    else if (target.classList.contains('album__content')) {
-        let id = target.getAttribute('id')
+
+    else if (target.classList.contains('item_title') && target.classList.contains('open') ) {
+        let deleteTarget = document.querySelector(`.item__content_${id}`)
+        deleteTarget.remove()
+        target.classList.remove('open')
+    }
+
+    else if (target.classList.contains('album_title') && !target.classList.contains('open')) {
+        target.insertAdjacentHTML('afterend', `<div class="album__content album__content_${id}"> </div>`)
         getPhoto(id, target)
+        target.classList.add('open')
     }
 
-
-
+    else if (target.classList.contains('album_title') && target.classList.contains('open') ) {
+        let deleteTarget = document.querySelector(`.album__content_${id}`)
+        deleteTarget.remove()
+        target.classList.remove('open')
+    }
 })
 
 //Добавление слушателя каждому элементу списка

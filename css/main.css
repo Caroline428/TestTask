@@ -52,10 +52,37 @@
     padding: 24px 0px 0px;
 }
 
-.main__item button {
+.button_plus_minus {
     background: #117DC1;
     color: white;
     border-radius: 100%;
     border: none;
     margin-right: 10px;
+}
+
+.item__content {
+
+}
+
+.album__content {
+    display: flex;
+}
+
+.star {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    background: #ffffff;
+
+    border: none;
+
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+
+    cursor: pointer;
+}
+.empty {
+    background-image: image('/images/empty.png');
 }
