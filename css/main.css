@@ -38,6 +38,13 @@
     border: none;
 }
 
+.btn_active {
+    background: #EDF9FF;
+    border-radius: 16px;
+    color: #117DC1;
+    cursor: pointer;
+}
+
 .btn:hover {
     background: #EDF9FF;
     border-radius: 16px;
@@ -47,9 +54,16 @@
 
 .main__item {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: flex-start;
     padding: 24px 0px 0px;
+}
+
+.item__box {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 10px
 }
 
 .button_plus_minus {
@@ -63,9 +77,24 @@
 .item__content {
 
 }
+.album__box {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 10px;
+}
 
 .album__content {
     display: flex;
+    flex-wrap: wrap;
+    padding-left: 10px;
+    row-gap: 10px;
+    column-gap: 10px;
+}
+
+.album__photo {
+
+    position: relative
 }
 
 .star {
@@ -73,16 +102,23 @@
     width: 32px;
     border-radius: 50%;
     background: #ffffff;
-
     border: none;
-
     position: absolute;
     top: 8px;
     right: 8px;
     z-index: 1;
-
     cursor: pointer;
 }
 .empty {
-    background-image: image('/images/empty.png');
+    background-image: url('../images/star_empty.png');
+}
+
+.active {
+    background-image: url('../images/star_active.png');
+}
+
+.preloader {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
 }
