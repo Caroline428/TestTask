@@ -13,19 +13,23 @@ start()
 btnCatalog.addEventListener('click', getContent)
 btnFavorites.addEventListener('click', getFavouritesContent)
 
-mainContent.addEventListener('click', function (event) {
+mainContent.addEventListener('click', async function (event) {
     let target = event.target
     let id = target.getAttribute('id')
 
 
     if (target.classList.contains('item_title') && !target.classList.contains('open') ) {
         let box = target.parentElement
+        let button = target.previousElementSibling
+        button.innerHTML = '-'
         box.insertAdjacentHTML('afterend', `<div class="item__content item__content_${id}"> </div>`)
-        getAlbums(id, target)
+        await getAlbums(id, target)
         target.classList.add('open')
     }
 
     else if (target.classList.contains('item_title') && target.classList.contains('open') ) {
+        let but = target.previousElementSibling
+        but.innerHTML = '+'
         let deleteTarget = document.querySelector(`.item__content_${id}`)
         deleteTarget.remove()
         target.classList.remove('open')
@@ -34,7 +38,7 @@ mainContent.addEventListener('click', function (event) {
     else if (target.classList.contains('album_title') && !target.classList.contains('open')) {
         let box = target.parentElement
         box.insertAdjacentHTML('afterend', `<div class="album__content album__content_${id}"> </div>`)
-        getPhoto(id, target)
+        await getPhoto(id, target)
         target.classList.add('open')
     }
 
@@ -44,13 +48,12 @@ mainContent.addEventListener('click', function (event) {
         target.classList.remove('open')
     }
     else if (target.classList.contains('star') && target.classList.contains('empty')) {
-        addFavorite(target.parentElement)
+        addFavorite(target)
         target.classList.remove('empty')
         target.classList.add('active')
-        console.log(target.parentElement)
     }
     else if (target.classList.contains('star') && target.classList.contains('active')) {
-        removeFavorite(target.parentElement)
+        removeFavorite(target)
         target.classList.remove('active')
         target.classList.add('empty')
     }
@@ -63,32 +66,15 @@ mainContent.addEventListener('click', function (event) {
 mainContainer.addEventListener('click', function (event) {
         let target = event.target
         if (target.classList.contains('modal')) {
-            removeModal(target)
-            console.log('шо такое')
+            target.remove()
         }
     })
 
 async function start() {
-     getContent()
-
+ await   getContent()
     getFavourites()
 }
-////////////////////
-function displayModal(target) {
-    let url = target.parentElement.getAttribute('href')
-    mainContent.insertAdjacentHTML('afterend', `
-    <div class="modal">
-        <div class="modal__img">
-           <img src="${url}">
-         </div>
-    </div>
-    `)
-}
 
-function removeModal(target) {
-    target.remove()
-}
-///////////////////
 
 async function getContent() {
     if (btnFavorites.classList.contains('btn_active')) {
@@ -96,55 +82,82 @@ async function getContent() {
         mainContent.innerHTML = ''
     }
     btnCatalog.classList.add('btn_active')
-
-    getUsers()
+    await getUsers()
 
 }
 
 function getFavouritesContent() {
     btnCatalog.classList.remove('btn_active')
     btnFavorites.classList.add('btn_active')
-    mainContent.innerHTML = ''
-
+    mainContent.innerHTML = '<div class="main__favourite"></div>'
+    getFavourites()
+    if (favouritePhoto.length === 0) {
+        displayFavouriteEmpty()
+    }
+    else {
+        for (let value of favouritePhoto.values()) {
+            let val = Object.values(value)
+            displayFavouritePhoto(val)
+        }
+    }
 }
 
 //////////////////////////////////////////
 function addFavorite(target) {
-    let id = target.getAttribute('id')
-    console.log(target.firstElementChild)
-    let url = target.firstElementChild.getAttribute('src')
-    localStorage.setItem(id,url)
+    let image = target.previousElementSibling
+    let id = image.getAttribute('id')
+    let urlThumbnail = image.getAttribute('src')
+    let url = image.parentElement.getAttribute('href')
+    let title = image.getAttribute('title')
+    let photo = {
+        id: id,
+        title: title,
+        urlThumbnail: urlThumbnail,
+        url: url
+    }
+    favouritePhoto.push(photo)
+    updateFavourite()
 
 }
 
+function updateFavourite() {
+    localStorage.setItem('favourite', JSON.stringify(favouritePhoto))
+}
+
 function removeFavorite(target) {
-    let id = target.getAttribute('id')
-    localStorage.removeItem(id)
+    let id = target.previousElementSibling.getAttribute('id')
+    favouritePhoto = favouritePhoto.filter((el) => Number(el.id) !== Number(id))
+    updateFavourite()
 
 }
 
 function getFavourites() {
-    for (let i=0; i<localStorage.length; i++) {
-        favouritePhoto[i] = localStorage.key(i)
-        console.log(localStorage.key(i))
-    }
+    favouritePhoto = JSON.parse(localStorage.getItem('favourite') || [])
+
 }
 
-
+function searchFavourite(id) {
+    let bol = false
+    for (let value of favouritePhoto.values()) {
+        bol = Object.values(value).includes(id.toString())
+        if (bol) {
+            break
+        }
+    }
+    return bol
+}
 
 
 //////////////////////////////////////////
 async function getUsers() {
     displayPreLoader(mainContent)
     try {
-
         let users = await fetch(usersUrl)
             .then(response => response.json())
 
         users.forEach(
             function (item) {
                 displayUsers(item)
-
             }
         )
     }
@@ -155,19 +168,16 @@ async function getUsers() {
     finally {
         removePreLoader(mainContent)
     }
-        // return users
 }
 
 async function getAlbums(userID, target) {
     displayPreLoader(target)
     try {
-
         let mainItem = document.querySelector(`.item__content_${userID}`)
         let albums = await fetch(albumsUrl + userID)
             .then(response => response.json())
         albums.forEach(
             function (item) {
-
                 displayAlbums(item, mainItem)
             })
     }
@@ -177,17 +187,12 @@ async function getAlbums(userID, target) {
     }
     finally {
          removePreLoader()
-
     }
-
-
-    // return albums
 }
 
 async function getPhoto(albumID, target) {
     displayPreLoader(target)
     try {
-
         let mainItem = document.querySelector(`.album__content_${albumID}`)
         let photo = await fetch(photoUrl + albumID)
             .then(response => response.json())
@@ -204,9 +209,6 @@ async function getPhoto(albumID, target) {
     finally {
          removePreLoader()
     }
-
-
-    // return photo
 }
 
 /////////////////////////////////////////////
@@ -218,7 +220,9 @@ function displayUsers(item) {
     `
     <div class="main__item" id="${id}">
         <div class="item__box">
-            <button class="button_plus_minus" id="${id}"> + </button>   
+            <button class="button" id="${id}"> 
+                +
+             </button>   
             <div class="item_title" id="${id}"> 
             ${username}
             </div>
@@ -237,7 +241,7 @@ function displayAlbums(item, mainItem) {
         `
     <div class="main__album" id="${id}">
         <div class="album__box">
-             <button class="button_plus_minus"> + </button>
+             <button class="button"> + </button>
             <div class="album_title" id="${id}">
             ${title}
             </div>
@@ -255,15 +259,60 @@ function displayPhoto(item, mainItem) {
         `
         <div class="album__photo album__photo_${id}" id="${id}">
             <a href="${url}" onclick="return false">
-                <img class="photo" src="${thumbnailUrl}" title="${title}">
-            </a>
-            <button class="star ${favouritePhoto.includes(id.toString()) ? 'active' : 'empty'}"></button>
+                <img class="photo" src="${thumbnailUrl}" title="${title}" id="${id}">          
+            <button class="star ${searchFavourite(id) ? 'active' : 'empty'}"></button>
+             </a>
          </div>
         `
         )
 }
 
-////////////////////////////////
+function displayFavouritePhoto(item) {
+    let target = mainContent.firstChild
+    let id = item[0]
+    let title = item[1]
+    let thumbnailUrl = item[2]
+    let url = item[3]
+
+    target.insertAdjacentHTML('beforeend',
+            `
+            <div class="album__photo album__photo_${id}" id="${id}">
+                 <div class="photo__content">
+                     <a href="${url}" onclick="return false">
+                       <img class="photo" src="${thumbnailUrl}" title="${title}" id="${id}">          
+                      <button class="star active"></button>
+                     </a>
+                     <div> ${title}</div>
+                 </div>
+             </div>
+            `
+        )
+}
+
+function displayFavouriteEmpty() {
+    let target = mainContent.firstChild
+    let img = 'images/empty.png'
+    target.insertAdjacentHTML('beforeend',
+        `
+            <div class="favourite_empty"> 
+                <img src="${img}">
+                    <div class="bold">Список избранного пуст</div>
+                    <div>Добавляйте изображения, нажимая на звездочки</div>
+            </div>
+            `
+    )
+}
+
+function displayModal(target) {
+    let url = target.parentElement.getAttribute('href')
+    mainContent.insertAdjacentHTML('afterend', `
+    <div class="modal">
+        <div class="modal__img">
+           <img src="${url}">
+         </div>
+    </div>
+    `)
+}
 
 function displayPreLoader(target) {
     let preLoader = 'images/loader.gif'
@@ -271,7 +320,7 @@ function displayPreLoader(target) {
     target.insertAdjacentHTML('afterend',
         `
         <div class="preloader">
-            <img src="${preLoader}"
+            <img src="${preLoader}">
         </div>
         `)
 }
