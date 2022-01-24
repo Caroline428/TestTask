@@ -1,0 +1,78 @@
+.main__btn {
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+    padding: 16px 32px;
+    background: rgb(255, 255, 255);
+    border: none;
+}
+
+.btn_active, .main__btn:hover {
+    background: #EDF9FF;
+    border-radius: 16px;
+    color: #117DC1;
+    cursor: pointer;
+}
+
+.list_button {
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 50%;
+    background: #117DC1;
+    color: white;
+    font-size: 22px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+.star {
+    height: 32px;
+    width: 32px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: none;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 1;
+    cursor: pointer;
+}
+
+.empty {
+    background-image: url('../images/star_empty.png');
+}
+
+.active {
+    background-image: url('../images/star_active.png');
+}
+
+.close {
+    position: absolute;
+    right: 32px;
+    top: 32px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.3;
+}
+
+.close:hover {
+    opacity: 1;
+}
+
+.close:before, .close:after {
+    position: absolute;
+    left: 15px;
+    content: ' ';
+    height: 33px;
+    width: 2px;
+    background-color: white;
+}
+
+.close:before {
+    transform: rotate(45deg);
+}
+
+.close:after {
+    transform: rotate(-45deg);
+}
