@@ -1,11 +1,11 @@
-import {getUsers} from "./apiRequests.js";
-import {btnCatalog, btnFavorites, mainContainer, mainContent} from "./constant.js";
-import {getFavourites} from "./storageRequests.js";
-import {displayFavouriteEmpty, displayFavouritePhoto, displayModal} from "./view.js";
-import {favouritePhoto} from "./storageRequests.js";
-import  * as clickProc  from "./clickProcessing.js";
-import {getAlbums, getPhoto} from "./apiRequests.js";
-import {addFavorite, removeFavorite} from "./storageRequests.js";
+import {getUsers} from "./js/apiRequests.js";
+import {btnCatalog, btnFavorites, mainContainer, mainContent} from "./js/constant.js";
+import {getFavourites} from "./js/storageRequests.js";
+import {displayFavouriteEmpty, displayFavouritePhoto, displayModal} from "./js/view.js";
+import {favouritePhoto} from "./js/storageRequests.js";
+import  * as clickProc  from "./js/clickProcessing.js";
+import {getAlbums, getPhoto} from "./js/apiRequests.js";
+import {addFavorite, removeFavorite} from "./js/storageRequests.js";
 
 await start()
 
